@@ -21,16 +21,18 @@ import frc.robot.swerve.SwerveDrive;
  * project.
  */
 public class Robot extends IterativeRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
+  private static final String kDefaultAuton = "Default";
+  private static final String kCustomAuton1 = "My Auto";
+  private String m_autonSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private final SwerveDrive drivetrain = RobotMap.drive;
   private final Joystick joystickLeft = RobotMap.joystickLeft;
   private final Joystick joystickRight = RobotMap.joystickRight;
 
-  private final AutonManager autonMain = new AutonManager();
+  private final AutonManager autonDefault = new AutonManager();
+  // Give your auton a better name than this.
+  private final AutonManager autonCustom1 = new AutonManager();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -38,20 +40,27 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void robotInit() {
-    autonMain.addStage(10, (double t) -> {
-      System.out.println("Auton called with t > 10 with t = " + t);
+    autonDefault.addStage(10, () -> {
       // Put auton code to run when time remaining is greater than 10 seconds
-      drivetrain.drive(1, 0, 1);
+    }).addStage(5, () -> {
+      // Put auton code to run when time remaining is greater than 5 seconds
+    }).addStage(0, () -> {
+      // Put auton code to run when time remaining is greater than 0
     });
 
-    autonMain.addStage(5, (double t) -> {
-      // code
+    autonCustom1.addStage(15, () -> {
+      drivetrain.drive(0, 1, 0); // Forward
+    }).addStage(10, () -> {
+      drivetrain.drive(1, 0, 0); // Right
+    }).addStage(5, () -> {
+      drivetrain.drive(0, 0, 1); // Spin clockwise
+    }).addStage(0, () -> {
+      drivetrain.drive(0, 0, -1); // Spin counter-clockwise
     });
 
-
-    m_chooser.addDefault("Default Auto", kDefaultAuto);
-    m_chooser.addObject("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    m_chooser.addDefault("Default Auton", kDefaultAuton);
+    m_chooser.addObject("Custom Auton 1", kCustomAuton1);
+    SmartDashboard.putData("Auton choices", m_chooser);
   }
 
   /**
@@ -79,10 +88,10 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
+    m_autonSelected = m_chooser.getSelected();
     // autoSelected = SmartDashboard.getString("Auto Selector",
     // defaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+    System.out.println("Auto selected: " + m_autonSelected);
   }
 
   /**
@@ -90,13 +99,13 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
+    switch (m_autonSelected) {
+      case kCustomAuton1:
+        autonCustom1.run();
         break;
-      case kDefaultAuto:
+      case kDefaultAuton:
       default:
-        autonMain.run();
+        autonDefault.run();
         break;
     }
   }
