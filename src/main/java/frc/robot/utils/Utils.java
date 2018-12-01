@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.utils;
 
 public final class Utils {
   public static double getMaxDoubleBeneathCap(Double[] arr, Double cap) {

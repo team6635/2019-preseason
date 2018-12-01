@@ -28,16 +28,12 @@ public class Robot extends IterativeRobot {
 
   private final SwerveDrive drivetrain = RobotMap.drive;
   private final Joystick joystickLeft = RobotMap.joystickLeft;
-  private final Joystick joystickRight = RobotMap.joystickRight;
+  // private final Joystick joystickRight = RobotMap.joystickRight;
 
   private final AutonManager autonDefault = new AutonManager();
   // Give your auton a better name than this.
   private final AutonManager autonCustom1 = new AutonManager();
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
   @Override
   public void robotInit() {
     autonDefault.addStage(10, () -> {
@@ -63,40 +59,15 @@ public class Robot extends IterativeRobot {
     SmartDashboard.putData("Auton choices", m_chooser);
   }
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-  }
-
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
-   */
   @Override
   public void autonomousInit() {
     m_autonSelected = m_chooser.getSelected();
     // autoSelected = SmartDashboard.getString("Auto Selector",
     // defaultAuto);
     System.out.println("Auto selected: " + m_autonSelected);
+    drivetrain.startAll();
   }
 
-  /**
-   * This function is called periodically during autonomous.
-   */
   @Override
   public void autonomousPeriodic() {
     switch (m_autonSelected) {
@@ -110,18 +81,18 @@ public class Robot extends IterativeRobot {
     }
   }
 
-  /**
-   * This function is called periodically during operator control.
-   */
+  @Override
+  public void teleopInit() {
+    drivetrain.startAll();
+  }
+
   @Override
   public void teleopPeriodic() {
     drivetrain.drive(joystickLeft.getX(), joystickLeft.getY(), joystickLeft.getZ());
   }
 
-  /**
-   * This function is called periodically during test mode.
-   */
   @Override
-  public void testPeriodic() {
+  public void disabledInit() {
+    drivetrain.stopAll();
   }
 }
