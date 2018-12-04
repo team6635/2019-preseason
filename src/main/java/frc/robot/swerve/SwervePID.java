@@ -10,7 +10,7 @@ public class SwervePID {
   private double lastError = 0;
   private double integral;
 
-  private double sampleRate = 50;
+  private long sampleRate;
   private double setpoint = 0;
 
   private final Timer timer;
@@ -19,10 +19,12 @@ public class SwervePID {
   private DoubleSupplier inputSupplier;
   private DoubleConsumer outputConsumer;
 
-  public SwervePID(double P, double I, double D, DoubleSupplier inputSupplier, DoubleConsumer outputConsumer) {
+  public SwervePID(double P, double I, double D, long sampleRate, DoubleSupplier inputSupplier, DoubleConsumer outputConsumer) {
     setKp(P);
     setKi(I);
     setKd(D);
+
+    this.sampleRate = sampleRate;
 
     setInputSupplier(inputSupplier);
     setOutputConsumer(outputConsumer);
@@ -38,7 +40,7 @@ public class SwervePID {
       }
     };
 
-    timer.scheduleAtFixedRate(task, 0, 50);
+    timer.scheduleAtFixedRate(task, 0L, (long)sampleRate);
   }
   
   public double calculate(double measured) {
@@ -111,15 +113,8 @@ public class SwervePID {
   /**
    * @return the sampleRate
    */
-  public double getSampleRate() {
+  public long getSampleRate() {
     return sampleRate;
-  }
-
-  /**
-   * @param sampleRate the sampleRate to set
-   */
-  public void setSampleRate(double sampleRate) {
-    this.sampleRate = sampleRate;
   }
 
   /**

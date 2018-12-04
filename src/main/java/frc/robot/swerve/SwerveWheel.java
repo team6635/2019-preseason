@@ -29,7 +29,7 @@ public final class SwerveWheel {
     this.unitTangentVector = new Vector2(tangentVector.x / tangentVector.hypot(),
         tangentVector.y / tangentVector.hypot());
 
-    swervePID = new SwervePID(1, 0, 0, this::pidSupplier, this::pidConsumer);
+    swervePID = new SwervePID(1, 0, 0, 50, this::pidSupplier, this::pidConsumer);
   }
 
   /**
