@@ -21,19 +21,18 @@ import frc.robot.swerve.SwerveDrive;
  * project.
  */
 public class Robot extends IterativeRobot {
-  private static final String kDefaultAuton = "Default";
-  private static final String kCustomAuton1 = "My Auto";
-  private String m_autonSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
-  private final SwerveDrive drivetrain = RobotMap.drive;
-  private final Joystick joystickLeft = RobotMap.joystickLeft;
-  // private final Joystick joystickRight = RobotMap.joystickRight;
-
+  // Auton
+  private static final String autonIDDefault = "Default";
+  private static final String autonIDCustom1 = "My Auto";
+  private String autonSelected;
+  private final SendableChooser<String> chooser = new SendableChooser<>();
   private final AutonManager autonDefault = new AutonManager();
-  // Give your auton a better name than this.
   private final AutonManager autonCustom1 = new AutonManager();
 
+  // Shortcuts to RobotMap values
+  private final SwerveDrive drivetrain = RobotMap.drive;
+  private final Joystick joystickLeft = RobotMap.joystickLeft;
+  
   @Override
   public void robotInit() {
     autonDefault.addStage(10, () -> {
@@ -45,45 +44,46 @@ public class Robot extends IterativeRobot {
     });
 
     autonCustom1.addStage(15, () -> {
-      drivetrain.drive(0, 1, 0); // Forward
+      RobotMap.motorDriveFrontLeft.set(1.0);
     }).addStage(10, () -> {
-      drivetrain.drive(1, 0, 0); // Right
+      RobotMap.motorDriveFrontLeft.set(-1.0);      
     }).addStage(5, () -> {
-      drivetrain.drive(0, 0, 1); // Spin clockwise
+      RobotMap.motorDriveFrontLeft.set(1.0);      
     }).addStage(0, () -> {
-      drivetrain.drive(0, 0, -1); // Spin counter-clockwise
+      RobotMap.motorDriveFrontLeft.set(-1.0);      
     });
 
-    m_chooser.addDefault("Default Auton", kDefaultAuton);
-    m_chooser.addObject("Custom Auton 1", kCustomAuton1);
-    SmartDashboard.putData("Auton choices", m_chooser);
+    chooser.addDefault("Default Auton", autonIDDefault);
+    chooser.addObject("Custom Auton 1", autonIDCustom1);
+    SmartDashboard.putData("Auton choices", chooser);
   }
 
   @Override
   public void autonomousInit() {
-    m_autonSelected = m_chooser.getSelected();
+    autonSelected = chooser.getSelected();
     // autoSelected = SmartDashboard.getString("Auto Selector",
     // defaultAuto);
-    System.out.println("Auto selected: " + m_autonSelected);
-    drivetrain.startAll();
+    System.out.println("Auto selected: " + autonSelected);
+    drivetrain.enable();
   }
 
   @Override
   public void autonomousPeriodic() {
-    switch (m_autonSelected) {
-      case kCustomAuton1:
-        autonCustom1.run();
+    switch (autonSelected) {
+    // This switch statement is a little messed up
+    // from testing. TODO.
+      case autonIDCustom1:
         break;
-      case kDefaultAuton:
+      case autonIDDefault:
       default:
-        autonDefault.run();
+        autonCustom1.run();
         break;
     }
   }
 
   @Override
   public void teleopInit() {
-    drivetrain.startAll();
+    drivetrain.enable();
   }
 
   @Override
@@ -93,6 +93,17 @@ public class Robot extends IterativeRobot {
 
   @Override
   public void disabledInit() {
-    drivetrain.stopAll();
+    drivetrain.disable();
+  }
+
+  @Override
+  public void testInit() {
+    // We are using this to test individual motors.
+    drivetrain.disable();
+    RobotMap.motorDriveFrontLeft.set(1);
+  }
+
+  @Override
+  public void testPeriodic() {
   }
 }

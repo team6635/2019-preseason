@@ -1,6 +1,7 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.utils.Utils;
@@ -16,7 +17,7 @@ import frc.robot.utils.Utils;
  * with {@code t = 10} would run.
  */
 public class AutonManager {
-  private Map<Double, Runnable> stages;
+  private Map<Double, Runnable> stages = new TreeMap<Double, Runnable>();
 
   /**
    * Adds a stage to the internal map of registered stages. The stages are automatically 
@@ -38,6 +39,8 @@ public class AutonManager {
    */
   public boolean run() {
     Double[] times = stages.keySet().toArray(new Double[0]);
+
+    System.out.println("AutonManager::run Time left := " + Timer.getMatchTime());
 
     double targetTime = Utils.getMaxDoubleBeneathCap(times, Timer.getMatchTime());
     
