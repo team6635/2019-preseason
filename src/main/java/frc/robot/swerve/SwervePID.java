@@ -2,153 +2,97 @@ package frc.robot.swerve;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
 
-public class SwervePID {
-  private double Kp, Ki, Kd;
-  private double lastError = 0;
-  private double integral;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-  private long sampleRate;
-  private double setpoint = 0;
+public abstract class SwervePID {
+  protected double Kp, Ki, Kd, tolerance;
+  protected long rate;
+  protected double setpoint = 0;
+  protected Timer timer;
 
-  private final Timer timer;
-  private boolean isTimerEnabled = false;
+  protected int cyclesSinceZero = 0;
+  protected double lastError = 0;
 
-  private DoubleSupplier inputSupplier;
-  private DoubleConsumer outputConsumer;
-
-  public SwervePID(double P, double I, double D, long sampleRate, DoubleSupplier inputSupplier, DoubleConsumer outputConsumer) {
-    setKp(P);
-    setKi(I);
-    setKd(D);
-
-    this.sampleRate = sampleRate;
-
-    setInputSupplier(inputSupplier);
-    setOutputConsumer(outputConsumer);
+  protected boolean isEnabled = false;
+  
+  public SwervePID(double Kp, double Ki, double Kd, long rate, double tolerance) {
+    this.Kp = Kp;
+    this.Ki = Ki;
+    this.Kd = Kd;
+    this.rate = rate;
+    this.tolerance = tolerance;
 
     timer = new Timer();
     TimerTask task = new TimerTask() {
       @Override
       public void run() {
-        if (!isTimerEnabled) {
+        if (!isEnabled)
           return;
-        }
-        outputConsumer.accept(calculate(inputSupplier.getAsDouble()));
+        pidUseOutput(calculate(pidInputProvider()));
       }
     };
-
-    timer.scheduleAtFixedRate(task, 0L, (long)sampleRate);
+    timer.scheduleAtFixedRate(task, 1, rate);
   }
   
-  public double calculate(double measured) {
-    double error = setpoint - measured;
-    integral += error * sampleRate;
-    double derivative = (error - lastError) / sampleRate;
-    lastError = error;
-    double output = Kp * error + Ki * integral + Kd * derivative;
-
-    return output;
-  }
-
-  public void enable() {
-    isTimerEnabled = true;
-  }
-
-  public void disable() {
-    isTimerEnabled = false;
-  }
-
-  /**
-   * @return the outputConsumer
-   */
-  public DoubleConsumer getOutputConsumer() {
-    return outputConsumer;
-  }
-
-  /**
-   * @param outputConsumer the outputConsumer to set
-   */
-  public void setOutputConsumer(DoubleConsumer outputConsumer) {
-    this.outputConsumer = outputConsumer;
-  }
-
-  /**
-   * @return the inputSupplier
-   */
-  public DoubleSupplier getInputSupplier() {
-    return inputSupplier;
-  }
-
-  /**
-   * @param inputSupplier the inputSupplier to set
-   */
-  public void setInputSupplier(DoubleSupplier inputSupplier) {
-    this.inputSupplier = inputSupplier;
-  }
-
-  /**
-   * @return the kp
-   */
-  public double getKp() {
-    return Kp;
-  }
-
-  /**
-   * @return the setpoint
-   */
-  public double getSetpoint() {
-    return setpoint;
-  }
-
-  /**
-   * @param setpoint the setpoint to set
-   */
   public void setSetpoint(double setpoint) {
     this.setpoint = setpoint;
   }
 
-  /**
-   * @return the sampleRate
-   */
-  public long getSampleRate() {
-    return sampleRate;
+  protected double calculate(double measured) {
+    SmartDashboard.putNumber("Measured", measured);    
+    SmartDashboard.putNumber("Setpoint", setpoint);
+
+    double sError = setpoint - measured;
+    double error;
+
+    if (sError > 180) {
+      error = sError - 360;
+    } else if (sError < -180) {
+      error = sError + 360;
+    } else {
+      error = sError;
+    }
+
+    if (Math.abs(error) >= 90 && Math.abs(error) <= 180) {
+      error = error + 180 % 360;
+    }
+    
+    SmartDashboard.putNumber("Error", error);
+    
+    if (Math.abs(error) <= tolerance) {
+      cyclesSinceZero = 0;
+      return 0;
+    } else {
+      cyclesSinceZero++;
+    }
+
+    double p = Kp * error;
+    double i = Ki * (error * cyclesSinceZero);
+    double d = Kd * (lastError - error / rate);
+
+    lastError = error;
+    
+    SmartDashboard.putNumber("p", p);
+    SmartDashboard.putNumber("i", i);
+    SmartDashboard.putNumber("d", d);
+
+    return -(p + i + d);
   }
 
-  /**
-   * @return the kd
-   */
-  public double getKd() {
-    return Kd;
+  public abstract double pidInputProvider();
+
+  public abstract void pidUseOutput(double output);
+
+  public double getTolerance() {
+    return tolerance;
   }
 
-  /**
-   * @param kd the kd to set
-   */
-  public void setKd(double kd) {
-    this.Kd = kd;
+  public void setTolerance(double tolerance) {
+    this.tolerance = tolerance;
   }
 
-  /**
-   * @return the ki
-   */
-  public double getKi() {
-    return Ki;
-  }
-
-  /**
-   * @param ki the ki to set
-   */
-  public void setKi(double ki) {
-    this.Ki = ki;
-  }
-
-  /**
-   * @param kp the kp to set
-   */
-  public void setKp(double kp) {
-    this.Kp = kp;
+  public void setEnabled(boolean value) {
+    isEnabled = value;
   }
 }

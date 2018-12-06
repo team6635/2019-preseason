@@ -19,13 +19,13 @@ public class SwerveDrive {
   
   public void disable() {
     for (int i = 0; i < wheels.length; i++) {
-      wheels[i].getSwervePID().disable();
+      wheels[i].setEnabled(false);
     }
   }
 
   public void enable() {
     for (int i = 0; i < wheels.length; i++) {
-      wheels[i].getSwervePID().enable();
+      wheels[i].setEnabled(true);
     }
   }
 }

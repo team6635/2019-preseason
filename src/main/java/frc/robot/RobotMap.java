@@ -2,9 +2,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.swerve.SwerveDrive;
 import frc.robot.swerve.SwerveWheel;
 
@@ -31,21 +31,20 @@ public class RobotMap {
   // Gyro
   public static final AnalogGyro gyro = new AnalogGyro(0);
   // Joysticks
-  public static final Joystick joystickLeft = new Joystick(0);
-  public static final Joystick joystickRight = new Joystick(1);
+  public final static XboxController xbox1 = new XboxController(0);
 
   // Swerve Drive:
   // Swerve Wheels
-  public static final SwerveWheel wheelFrontLeft = new SwerveWheel(motorDriveFrontLeft, motorPivotFrontLeft, encoderPivotFrontLeft, -13, 18);
-  public static final SwerveWheel wheelFrontRight = new SwerveWheel(motorDriveFrontRight, motorPivotFrontRight, encoderPivotFrontRight, 13, 18);
-  public static final SwerveWheel wheelRearRight = new SwerveWheel(motorDriveRearRight, motorPivotRearRight, encoderPivotRearRight, 13, -18);
-  public static final SwerveWheel wheelRearLeft = new SwerveWheel(motorDriveRearLeft, motorPivotRearLeft, encoderPivotRearLeft, -13, -18);
+  public static final SwerveWheel wheelFrontLeft = new SwerveWheel(motorDriveFrontLeft, motorPivotFrontLeft, encoderPivotFrontLeft, -10, 12);
+  public static final SwerveWheel wheelFrontRight = new SwerveWheel(motorDriveFrontRight, motorPivotFrontRight, encoderPivotFrontRight, 10, 12);
+  public static final SwerveWheel wheelRearRight = new SwerveWheel(motorDriveRearRight, motorPivotRearRight, encoderPivotRearRight, 10, -12);
+  public static final SwerveWheel wheelRearLeft = new SwerveWheel(motorDriveRearLeft, motorPivotRearLeft, encoderPivotRearLeft, -10, -12);
   // Drivetrain
   public static final SwerveWheel[] wheels = new SwerveWheel[] {
     wheelFrontLeft,
-    wheelFrontRight,
-    wheelRearRight,
-    wheelRearLeft,
+    // wheelFrontRight,
+    // wheelRearRight,
+    // wheelRearLeft,
   };
 
   public static final SwerveDrive drive = new SwerveDrive(wheels, gyro);

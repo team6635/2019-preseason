@@ -38,6 +38,11 @@ public class AutonManager {
    * @return A boolean indicating whether a stage was run or not.
    */
   public boolean run() {
+    if (Timer.getMatchTime() <= 0) {
+      System.out.println("AutonManager::run  time remaining <= 0 := " + Timer.getMatchTime());
+      return false;
+    }
+
     Double[] times = stages.keySet().toArray(new Double[0]);
 
     System.out.println("AutonManager::run Time left := " + Timer.getMatchTime());

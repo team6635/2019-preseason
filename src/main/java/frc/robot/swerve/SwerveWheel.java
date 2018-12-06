@@ -2,9 +2,10 @@ package frc.robot.swerve;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Vector2;
 
-public final class SwerveWheel {
+public final class SwerveWheel extends SwervePID {
   private final SpeedController motorDrive;
   private final SpeedController motorPivot;
   private final Encoder encoderPivot;
@@ -14,10 +15,12 @@ public final class SwerveWheel {
   private final Vector2 tangentVector;
   private final Vector2 unitTangentVector;
 
-  private final SwervePID swervePID;
+  // TODO: add getter/setter
+  private double controllerTolerance = 0.08;
 
   public SwerveWheel(SpeedController motorDrive, SpeedController motorPivot, Encoder encoderPivot, 
       double locationX, double locationY) {
+    super(0.015, 0.001, 0.0025, 20, 1);
     this.motorDrive = motorDrive;
     this.motorPivot = motorPivot;
     this.encoderPivot = encoderPivot;
@@ -28,43 +31,37 @@ public final class SwerveWheel {
     this.tangentVector = new Vector2(-locationY, locationX);
     this.unitTangentVector = new Vector2(tangentVector.x / tangentVector.hypot(),
         tangentVector.y / tangentVector.hypot());
-
-    swervePID = new SwervePID(1, 0, 0, 50, this::pidSupplier, this::pidConsumer);
   }
 
-  /**
-   * Supplies the current measurement for PID.
-   * @return
-   */
-  private double pidSupplier() {
-    return (encoderPivot.getDistance() + 360) % 360;
-  }
+  protected Vector2 calculateSwerve(double xInput, double yInput, double zInput) {
+    Vector2 rVector = new Vector2(zInput * unitTangentVector.x, zInput * unitTangentVector.y);
+    Vector2 resultVector = new Vector2(xInput + rVector.x, yInput + rVector.y);
 
-  /**
-   * Consumes the resultant double from the PID.
-   * @param result
-   */
-  private void pidConsumer(double result) {
-    System.out.println("TODO: SwerveWheel::pidConsumer result := " + result);
+    double angle = Math.atan2(resultVector.y, resultVector.x) * (180 / Math.PI) - 90 % 360;
+    double speed = resultVector.hypot();
+
+    return new Vector2(angle, speed);
   }
 
   protected void updateWheel(double xInput, double yInput, double zInput) {
-    System.out.println("SwerveWheel::updateWheel " + xInput + ", " + yInput + ", " + zInput);
-    Vector2 rvector = new Vector2(zInput * getTangentVector().x, zInput * getTangentVector().y);
-    Vector2 resultv = new Vector2(xInput + rvector.x, yInput + rvector.y);
+    SmartDashboard.putNumber("ControllerTolerance", controllerTolerance);
+    if (Math.abs(xInput + yInput + zInput) / 3 <= controllerTolerance) {
+      motorDrive.set(0);
+      return;
+    }
 
-    double angle = ((Math.toDegrees(Math.atan2(resultv.x, resultv.y)) - 90) + 360) % 360;
-    double motorSpeed = resultv.hypot() > 1 ? 1 : resultv.hypot();
+    Vector2 calculated = calculateSwerve(xInput, yInput, zInput);
 
-    System.out.println("SwerveWheel::updateWheel angle := " + angle);
-    System.out.println("SwerveWheel::updateWheel motorSpeed := " + motorSpeed);
+    double current = pidInputProvider();
 
-    swervePID.setSetpoint(angle);
-    getDriveMotor().set(motorSpeed);
-  }
+    double sError = setpoint - current;
 
-  public SwervePID getSwervePID() {
-    return swervePID;
+    if (Math.abs(sError) >= 90 && Math.abs(sError) <= 180) {
+      calculated.y = -calculated.y;
+    }
+
+    setSetpoint(calculated.x);
+    motorDrive.set(calculated.y);
   }
 
   public SpeedController getDriveMotor() {
@@ -93,5 +90,15 @@ public final class SwerveWheel {
 
   public Vector2 getUnitTangentVector() {
     return unitTangentVector;
+  }
+
+  @Override
+  public double pidInputProvider() {
+    return ((encoderPivot.getDistance() % 360) + 360) % 360;
+  }
+
+  @Override
+  public void pidUseOutput(double output) {
+    motorPivot.set(output);
   }
 }
