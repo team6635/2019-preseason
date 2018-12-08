@@ -52,14 +52,6 @@ public final class SwerveWheel extends SwervePID {
 
     Vector2 calculated = calculateSwerve(xInput, yInput, zInput);
 
-    double current = pidInputProvider();
-
-    double sError = setpoint - current;
-
-    if (Math.abs(sError) >= 90 && Math.abs(sError) <= 180) {
-      calculated.y = -calculated.y;
-    }
-
     setSetpoint(calculated.x);
     motorDrive.set(calculated.y);
   }

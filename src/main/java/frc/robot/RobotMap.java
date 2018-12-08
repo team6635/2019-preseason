@@ -35,16 +35,16 @@ public class RobotMap {
 
   // Swerve Drive:
   // Swerve Wheels
-  public static final SwerveWheel wheelFrontLeft = new SwerveWheel(motorDriveFrontLeft, motorPivotFrontLeft, encoderPivotFrontLeft, -10, 12);
-  public static final SwerveWheel wheelFrontRight = new SwerveWheel(motorDriveFrontRight, motorPivotFrontRight, encoderPivotFrontRight, 10, 12);
-  public static final SwerveWheel wheelRearRight = new SwerveWheel(motorDriveRearRight, motorPivotRearRight, encoderPivotRearRight, 10, -12);
-  public static final SwerveWheel wheelRearLeft = new SwerveWheel(motorDriveRearLeft, motorPivotRearLeft, encoderPivotRearLeft, -10, -12);
+  public static final SwerveWheel wheelFrontLeft = new SwerveWheel(motorDriveFrontLeft, motorPivotFrontLeft, encoderPivotFrontLeft, -9, 11);
+  public static final SwerveWheel wheelFrontRight = new SwerveWheel(motorDriveFrontRight, motorPivotFrontRight, encoderPivotFrontRight, 9, 11);
+  public static final SwerveWheel wheelRearRight = new SwerveWheel(motorDriveRearRight, motorPivotRearRight, encoderPivotRearRight, 9, -11);
+  public static final SwerveWheel wheelRearLeft = new SwerveWheel(motorDriveRearLeft, motorPivotRearLeft, encoderPivotRearLeft, -9, -11);
   // Drivetrain
   public static final SwerveWheel[] wheels = new SwerveWheel[] {
     wheelFrontLeft,
-    // wheelFrontRight,
-    // wheelRearRight,
-    // wheelRearLeft,
+    wheelFrontRight,
+    wheelRearRight,
+    wheelRearLeft,
   };
 
   public static final SwerveDrive drive = new SwerveDrive(wheels, gyro);
