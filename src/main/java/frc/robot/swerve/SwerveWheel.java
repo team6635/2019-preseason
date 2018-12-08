@@ -2,7 +2,6 @@ package frc.robot.swerve;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Vector2;
 
 public final class SwerveWheel extends SwervePID {
@@ -14,9 +13,6 @@ public final class SwerveWheel extends SwervePID {
   private final double locationY;
   private final Vector2 tangentVector;
   private final Vector2 unitTangentVector;
-
-  // TODO: add getter/setter
-  private double controllerTolerance = 0.08;
 
   public SwerveWheel(SpeedController motorDrive, SpeedController motorPivot, Encoder encoderPivot, 
       double locationX, double locationY) {
@@ -41,19 +37,6 @@ public final class SwerveWheel extends SwervePID {
     double speed = resultVector.hypot();
 
     return new Vector2(angle, speed);
-  }
-
-  protected void updateWheel(double xInput, double yInput, double zInput) {
-    SmartDashboard.putNumber("ControllerTolerance", controllerTolerance);
-    if (Math.abs(xInput + yInput + zInput) / 3 <= controllerTolerance) {
-      motorDrive.set(0);
-      return;
-    }
-
-    Vector2 calculated = calculateSwerve(xInput, yInput, zInput);
-
-    setSetpoint(calculated.x);
-    motorDrive.set(calculated.y);
   }
 
   public SpeedController getDriveMotor() {
