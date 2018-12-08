@@ -17,21 +17,23 @@ public class SwerveDrive {
 
   public void drive(double xInput, double yInput, double zInput) {
     SmartDashboard.putNumber("ControllerTolerance", controllerTolerance);
-    if (Math.abs(xInput) + Math.abs(yInput) + Math.abs(zInput) / 3 <= controllerTolerance) {
-      xInput = 0;
-      yInput = 0;
-      zInput = 0;
-    }
 
     double[] speeds = new double[wheels.length];
 
-    for (int i = 0; i < wheels.length; i++) {
-      Vector2 calculated = wheels[i].calculateSwerve(xInput, yInput, zInput);
-      wheels[i].setSetpoint(calculated.x);
-      speeds[i] = calculated.y;
-    }
+    if (Math.abs(xInput) + Math.abs(yInput) + Math.abs(zInput) / 3 <= controllerTolerance) {
+      for (int i = 0; i < speeds.length; i++) {
+        speeds[i] = 0;
+        wheels[i].setSetpoint(wheels[i].pidInputProvider());
+      }
+    } else {
+      for (int i = 0; i < wheels.length; i++) {
+        Vector2 calculated = wheels[i].calculateSwerve(xInput, yInput, zInput);
+        wheels[i].setSetpoint(calculated.x);
+        speeds[i] = calculated.y;
+      }
 
-    Utils.capValuesSymmetrically(speeds, 1.0);
+      Utils.capValuesSymmetrically(speeds, 1.0);
+    }
 
     for (int i = 0; i < wheels.length; i++) {
       wheels[i].getDriveMotor().set(speeds[i]);

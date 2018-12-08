@@ -9,10 +9,34 @@ import frc.robot.swerve.SwerveDrive;
 public class Robot extends IterativeRobot {
   private final SwerveDrive drivetrain = RobotMap.drive;
   private final XboxController xbox1 = RobotMap.xbox1;
+  private final AutonManager testAuton = new AutonManager();
   
+  @Override
+  public void robotInit() {
+    testAuton.addStage(10, () -> {
+      drivetrain.drive(0, 1, 0);
+    }).addStage(7, () -> {
+      drivetrain.drive(1, 0, 0);
+    }).addStage(3.5, () -> {
+      drivetrain.drive(0, 0, 1);
+    }).addStage(0, () -> {
+      drivetrain.drive(1, 1, 0);
+    });
+  }
+
   @Override
   public void robotPeriodic() {
     
+  }
+
+  @Override
+  public void autonomousInit() {
+    drivetrain.enable();
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+    testAuton.run();
   }
 
   @Override

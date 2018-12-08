@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.utils.Utils;
 
 /**
@@ -23,13 +24,13 @@ public class AutonManager {
    * Adds a stage to the internal map of registered stages. The stages are automatically 
    * sorted, so there is no required order to add them in; however, for readability,
    * you should add the stages in chronological order.
-   * @param startWhenAfter The stage is executed if and only if the remaining auton 
+   * @param runUntil The stage is executed if and only if the remaining auton 
    * time is greater than this parameter.
    * @param stageExec The code to execute. This should be either a void lambda or a void
    * reference to a method using the {@code ::} operator.
    */
-  public AutonManager addStage(double startWhenAfter, Runnable stageExec) {
-    stages.put(startWhenAfter, stageExec);
+  public AutonManager addStage(double runUntil, Runnable stageExec) {
+    stages.put(runUntil, stageExec);
     return this;
   }
 
@@ -45,11 +46,13 @@ public class AutonManager {
 
     Double[] times = stages.keySet().toArray(new Double[0]);
 
-    System.out.println("AutonManager::run Time left := " + Timer.getMatchTime());
+    SmartDashboard.putNumber("Auton time left", Timer.getMatchTime());
 
     double targetTime = Utils.getMaxDoubleBeneathCap(times, Timer.getMatchTime());
+
+    SmartDashboard.putNumber("Auton Target Stage", targetTime);
     
-    if (targetTime == 0) {
+    if (!stages.containsKey(targetTime)) {
       return false;
     } else {
       stages.get(targetTime).run();
